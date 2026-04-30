@@ -64,8 +64,35 @@
   .uptime-bar { height: 2px; background: var(--border); margin-top: 12px; overflow: hidden; }
   .uptime-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); animation: scan 3s linear infinite; }
   @keyframes scan { 0% { width: 0%; margin-left: 0; } 50% { width: 100%; margin-left: 0; } 100% { width: 0%; margin-left: 100%; } }
-  footer { margin-top: 40px; border-top: 1px solid var(--border); padding-top: 16px; display: flex; justify-content: space-between; }
+  footer { margin-top: 40px; border-top: 1px solid var(--border); padding-top: 16px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
   .footer-text { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--dim); letter-spacing: 2px; }
+
+  /* Tablet */
+  @media (max-width: 900px) {
+    .grid { grid-template-columns: 1fr 1fr; }
+    .grid-2 { grid-template-columns: 1fr; }
+    .services-grid { grid-template-columns: 1fr 1fr; }
+    h1 { font-size: 40px; letter-spacing: 5px; }
+  }
+
+  /* Mobile */
+  @media (max-width: 600px) {
+    .container { padding: 20px 14px; }
+    header { flex-direction: column; gap: 16px; align-items: flex-start; margin-bottom: 28px; }
+    h1 { font-size: 28px; letter-spacing: 4px; }
+    .tagline { font-size: 11px; letter-spacing: 2px; }
+    .grid { grid-template-columns: 1fr; }
+    .grid-2 { grid-template-columns: 1fr; }
+    .services-grid { grid-template-columns: 1fr 1fr; gap: 4px; }
+    .big-number { font-size: 36px; }
+    .mode-display { font-size: 22px; letter-spacing: 3px; }
+    .panel { padding: 16px; }
+    .log-panel { padding: 16px; }
+    .log-entry { font-size: 10px; gap: 10px; }
+    .log-time { min-width: 64px; }
+    .service-item { padding: 6px 8px; }
+    footer { flex-direction: column; gap: 6px; }
+  }
 </style>
 </head>
 <body>
