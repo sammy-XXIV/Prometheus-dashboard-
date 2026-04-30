@@ -61,6 +61,11 @@
   .log-msg.success { color: var(--accent2); }
   .log-msg.warn { color: var(--warn); }
   .log-msg.danger { color: var(--danger); }
+  .pnl { font-family: 'Share Tech Mono', monospace; font-size: 13px; margin-top: 10px; letter-spacing: 1px; display: flex; align-items: center; gap: 6px; }
+  .pnl-positive { color: var(--accent2); }
+  .pnl-negative { color: var(--danger); }
+  .pnl-neutral  { color: var(--dim); }
+  .pnl-label { font-size: 10px; color: var(--dim); letter-spacing: 2px; margin-top: 4px; font-family: 'Share Tech Mono', monospace; }
   .uptime-bar { height: 2px; background: var(--border); margin-top: 12px; overflow: hidden; }
   .uptime-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); animation: scan 3s linear infinite; }
   @keyframes scan { 0% { width: 0%; margin-left: 0; } 50% { width: 100%; margin-left: 0; } 100% { width: 0%; margin-left: 100%; } }
@@ -117,6 +122,8 @@
       <div class="panel-label">Treasury Balance</div>
       <div class="big-number green" id="balance">--</div>
       <div class="sub-label">USDC // KITE NETWORK</div>
+      <div class="pnl" id="pnl"><span class="pnl-neutral">-- USDC</span></div>
+      <div class="pnl-label" id="pnl-label">PnL SINCE SESSION START</div>
     </div>
     <div class="panel">
       <div class="panel-label">Operational Mode</div>
@@ -206,6 +213,32 @@
     } catch(e) { addLog('Services fetch failed', 'warn') }
   }
 
+  const SESSION_KEY = 'prometheus_session_balance'
+  const SESSION_TIME_KEY = 'prometheus_session_time'
+
+  function updatePnl(current) {
+    let base = parseFloat(localStorage.getItem(SESSION_KEY))
+    let sessionStart = localStorage.getItem(SESSION_TIME_KEY)
+
+    if (!base || isNaN(base)) {
+      localStorage.setItem(SESSION_KEY, current)
+      localStorage.setItem(SESSION_TIME_KEY, new Date().toISOString())
+      base = current
+      sessionStart = new Date().toISOString()
+    }
+
+    const delta = current - base
+    const sign = delta > 0 ? '+' : ''
+    const cls = delta > 0 ? 'pnl-positive' : delta < 0 ? 'pnl-negative' : 'pnl-neutral'
+    const arrow = delta > 0 ? '▲' : delta < 0 ? '▼' : '●'
+    const since = new Date(sessionStart)
+    const mins = Math.round((Date.now() - since) / 60000)
+    const timeStr = mins < 60 ? `${mins}m` : `${Math.floor(mins/60)}h ${mins%60}m`
+
+    document.getElementById('pnl').innerHTML = `<span class="${cls}">${arrow} ${sign}$${Math.abs(delta).toFixed(4)} USDC</span>`
+    document.getElementById('pnl-label').textContent = `PnL SINCE SESSION START (${timeStr} AGO)`
+  }
+
   async function fetchBalance() {
     try {
       const res = await fetch('https://rpc.gokite.ai/', {
@@ -215,8 +248,9 @@
       })
       const data = await res.json()
       const balance = (parseInt(data.result, 16) / 1e6).toFixed(4)
-      document.getElementById('balance').textContent = '$' + balance
       const b = parseFloat(balance)
+      document.getElementById('balance').textContent = '$' + balance
+      updatePnl(b)
       const mode = b >= 3 ? 'THRIVING' : b >= 2 ? 'GROWTH' : b >= 1 ? 'STABLE' : b >= 0.5 ? 'UNSTABLE' : b >= 0.2 ? 'SURVIVAL' : b > 0 ? 'CRITICAL' : 'DYING'
       const el = document.getElementById('mode')
       el.textContent = mode
